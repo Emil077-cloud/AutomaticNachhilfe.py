@@ -17,7 +17,7 @@ EMAIL = "LOGIN_EMAIL"
 PASSWORD = "LOGIN_PASSWORD"
 
 PUSHOVER_USER_KEY = "PUSHOVER_USER"
-PUSHOVER_API_TOKEN = "PUSHOVER_API"*
+PUSHOVER_API_TOKEN = "PUSHOVER_API"
 
 service = Service(ChromeDriverManager().install())
 
@@ -121,3 +121,4 @@ def main():
 if __name__ == "__main__":
     sende_push_benachrichtigung("Skript gestartet", "Das Überwachungs-Skript läuft jetzt.")
     main()
+
