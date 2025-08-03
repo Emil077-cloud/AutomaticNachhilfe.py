@@ -14,6 +14,9 @@ PASSWORD = "LOGIN_PASSWORD"
 PUSHOVER_USER_KEY = "PUSHOVER_USER"
 PUSHOVER_API_TOKEN = "PUSHOVER_API"
 
+print(f"Token: >{PUSHOVER_API_TOKEN}<")
+print(f"User: >{PUSHOVER_USER_KEY}<")
+
 def sende_push_benachrichtigung(titel, nachricht=""):
     payload = {
         "token": PUSHOVER_API_TOKEN,
@@ -82,3 +85,4 @@ async def loop():
 
 if __name__ == "__main__":
     asyncio.run(loop())
+
