@@ -1,23 +1,18 @@
-from selenium.webdriver.chrome.service import Service
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
+import asyncio
+from playwright.async_api import async_playwright
 import requests
 import time
-import traceback
-import os
 
 # === KONFIGURATION ===
 
-LOGIN_URL = os.environ.get("LOGIN_URL")
-ANFRAGEN_URL = os.environ.get("ANFRAGEN_URL")
-EMAIL = os.environ.get("LOGIN_EMAIL")
-PASSWORD = os.environ.get("LOGIN_PASSWORD")
-PUSHOVER_USER_KEY = os.environ.get("PUSHOVER_USER")
-PUSHOVER_API_TOKEN = os.environ.get("PUSHOVER_API")
+LOGIN_URL = "LOGIN_URL"
+ANFRAGEN_URL = "ANFRAGEN_URL"
+
+EMAIL = "LOGIN_EMAIL"
+PASSWORD = "LOGIN_PASSWORD"
+
+PUSHOVER_USER_KEY = "PUSHOVER_USER"
+PUSHOVER_API_TOKEN = "PUSHOVER_API"
 
 def sende_push_benachrichtigung(titel, nachricht=""):
     payload = {
@@ -32,71 +27,50 @@ def sende_push_benachrichtigung(titel, nachricht=""):
     else:
         print("❌ Fehler bei Push:", response.text)
 
-def login(driver):
-    driver.get(LOGIN_URL)
-    try:
-        cookie_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, "CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll"))
-        )
-        cookie_button.click()
-        print("🍪 Cookie-Banner akzeptiert.")
-    except:
-        print("🍪 Kein Cookie-Banner gefunden oder schon akzeptiert.")
 
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "loginemail")))
-    driver.find_element(By.NAME, "loginemail").send_keys(EMAIL)
-    driver.find_element(By.NAME, "loginpassword").send_keys(PASSWORD)
-    login_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.NAME, "login")))
-    login_button.click()
+async def check():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context()
+        page = await context.new_page()
 
-def accept_anfrage(driver):
-    if "Mathematik" in driver.page_source or "Mathe" in driver.page_source:
+        print("🌐 Login...")
+        await page.goto(LOGIN_URL)
+
         try:
-            button = driver.find_element(By.NAME, "bewerben")
-            button.click()
-            sende_push_benachrichtigung("Erfolgreich beworben", "Eine Mathe-Anfrage wurde automatisch angenommen.")
+            await page.click("#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll", timeout=5000)
+            print("🍪 Cookie akzeptiert.")
         except:
-            sende_push_benachrichtigung("Fehler", "Knopf drücken hat nicht funktioniert!")
-    else:
-        sende_push_benachrichtigung("Andere Anfrage", "Die Anfrage ist nicht für Mathe.")
+            print("🍪 Kein Cookie-Banner gefunden.")
 
-def check_anfragen(driver):
-    driver.get(ANFRAGEN_URL)
-    time.sleep(3)
-    try:
-        driver.find_element(By.XPATH, '//*[@id="online-anfragen-div"]//p[contains(text(), "Zur Zeit keine Anfragen verfügbar.")]')
-        print("📭 Keine neue Anfrage gefunden.")
-    except:
-        print("🎉 Neue Anfrage gefunden!")
-        accept_anfrage(driver)
-        sende_push_benachrichtigung("Neue Anfrage", "Es gibt eine neue Unterrichtsanfrage!")
+        await page.fill('input[name="loginemail"]', EMAIL)
+        await page.fill('input[name="loginpassword"]', PASSWORD)
+        await page.click('button[name="login"]')
 
-def main():
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("user-agent=Mozilla/5.0")
-    options.binary_location = "/usr/bin/chromium-browser"  # WICHTIG!
+        await page.wait_for_timeout(3000)
+        await page.goto(ANFRAGEN_URL)
 
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
+        if "Zur Zeit keine Anfragen verfügbar" in await page.content():
+            print("📭 Keine neue Anfrage.")
+        else:
+            print("🎉 Neue Anfrage gefunden!")
+            try:
+                await page.click('button[name="bewerben"]')
+                sende_push_benachrichtigung("Beworben", "Erfolgreich auf neue Anfrage beworben.")
+            except:
+                sende_push_benachrichtigung("Fehler", "Bewerbungs-Knopf nicht gefunden.")
+        
+        await browser.close()
 
-    try:
-        login(driver)
-        while True:
-            check_anfragen(driver)
-            print("Warte 60 Sekunden bis zum nächsten Check...")
-            time.sleep(60)
-    except Exception as e:
-        print("❌ Fehler:", e)
-        print(traceback.format_exc())
-        sende_push_benachrichtigung("Fehler im Skript", str(e))
-    finally:
-        driver.quit()
+async def loop():
+    sende_push_benachrichtigung("Skript gestartet", "Das Playwright-Skript läuft jetzt.")
+    while True:
+        try:
+            await check()
+        except Exception as e:
+            sende_push_benachrichtigung("Fehler im Skript", str(e))
+            print("❌ Fehler:", e)
+        await asyncio.sleep(60)
 
 if __name__ == "__main__":
-    sende_push_benachrichtigung("Skript gestartet", "Das Skript läuft jetzt.")
-    main()
+    asyncio.run(loop())
