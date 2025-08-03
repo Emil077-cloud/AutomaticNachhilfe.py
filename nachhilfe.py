@@ -50,15 +50,23 @@ async def check():
         await page.wait_for_timeout(3000)
         await page.goto(ANFRAGEN_URL)
 
-        if "Zur Zeit keine Anfragen verfügbar" in await page.content():
-            print("📭 Keine neue Anfrage.")
-        else:
+        try:
+            # XPath überprüfen wie bei Selenium
+            kein_anfrage_element = await page.query_selector(
+                'xpath=//*[@id="online-anfragen-div"]//p[contains(text(), "Zur Zeit keine Anfragen verfügbar.")]'
+            )
+            if kein_anfrage_element:
+                print("📭 Keine neue Anfrage.")
+            else:
+                raise Exception("Element nicht vorhanden = Anfrage vorhanden")
+        except:
             print("🎉 Neue Anfrage gefunden!")
-            try:
-                await page.click('button[name="bewerben"]')
-                sende_push_benachrichtigung("Beworben", "Erfolgreich auf neue Anfrage beworben.")
-            except:
-                sende_push_benachrichtigung("Fehler", "Bewerbungs-Knopf nicht gefunden.")
+            if "Mahte" in await page.content() or "Mahtematik" in await page.content():
+                try:
+                    await page.click('button[name="bewerben"]')
+                    sende_push_benachrichtigung("Beworben", "Erfolgreich auf neue Anfrage beworben.")
+                except:
+                    sende_push_benachrichtigung("Fehler", "Bewerbungs-Knopf nicht gefunden.")
         
         await browser.close()
 
