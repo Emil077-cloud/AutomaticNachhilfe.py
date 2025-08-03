@@ -2,17 +2,18 @@ import asyncio
 from playwright.async_api import async_playwright
 import requests
 import time
+import os
 
 # === KONFIGURATION ===
 
-LOGIN_URL = "LOGIN_URL"
-ANFRAGEN_URL = "ANFRAGEN_URL"
+LOGIN_URL = os.getenv("LOGIN_URL")
+ANFRAGEN_URL = os.getenv("ANFRAGEN_URL")
 
-EMAIL = "LOGIN_EMAIL"
-PASSWORD = "LOGIN_PASSWORD"
+EMAIL = os.getenv("LOGIN_EMAIL")
+PASSWORD = os.getenv("LOGIN_PASSWORD")
 
-PUSHOVER_USER_KEY = "PUSHOVER_USER"
-PUSHOVER_API_TOKEN = "PUSHOVER_API"
+PUSHOVER_API_TOKEN = os.getenv("PUSHOVER_API")
+PUSHOVER_USER_KEY = os.getenv("PUSHOVER_USER")
 
 print(f"Token: >{PUSHOVER_API_TOKEN}<")
 print(f"User: >{PUSHOVER_USER_KEY}<")
@@ -85,4 +86,5 @@ async def loop():
 
 if __name__ == "__main__":
     asyncio.run(loop())
+
 
