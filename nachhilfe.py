@@ -60,7 +60,10 @@ async def check():
         for frame in page.frames:
             btn = await frame.query_selector(f'xpath={login_xpath}')
             if btn:
-                await btn.click()
+                await btn.scroll_into_view_if_needed()
+                await btn.wait_for_element_state("visible")
+                await btn.wait_for_element_state("enabled")
+                await btn.click(force=True)
                 print(f"✅ Login-Button im Frame {frame.url} geklickt.")
                 sende_push_benachrichtigung("✅ Login Button gedrückt", f"Frame: {frame.url}")
                 login_button_clicked = True
@@ -94,6 +97,7 @@ async def run_script():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
+
 
 
 
