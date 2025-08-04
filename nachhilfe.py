@@ -65,16 +65,19 @@ async def check():
                 raise Exception("Element nicht vorhanden = Anfrage vorhanden")
         except:
             print("🎉 Neue Anfrage gefunden!")
+            sende_push_benachrichtigung("Neue Anfrage!", "Du hast eine neue Anfrage.")
             if "Mahte" in await page.content() or "Mahtematik" in await page.content():
                 try:
                     await page.click('button[name="annehmen"]')
                     sende_push_benachrichtigung("Beworben", "Erfolgreich auf neue Anfrage beworben.")
                 except:
                     sende_push_benachrichtigung("Fehler", "Bewerbungs-Knopf nicht gefunden.")
+            else:
+                sende_push_benachrichtigung("Fehler", "Falsches Fach.")
         
         await browser.close()
 
-async def loop():
+async def run_script():
     sende_push_benachrichtigung("Skript gestartet", "Das Playwright-Skript läuft jetzt.")
     while True:
         try:
@@ -83,9 +86,6 @@ async def loop():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
-
-if __name__ == "__main__":
-    asyncio.run(loop())
 
 
 
