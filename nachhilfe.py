@@ -79,12 +79,13 @@ async def check():
         try:
             await page.wait_for_selector(
             'xpath=//*[@id="online-anfragen-div"]//p[contains(text(), "Zur Zeit keine Anfragen verfügbar.")]',
-            timeout=5000
-             )
-            sende_push_benachrichtigung("📭 Keine neue Anfrage.")
-        except asyncio.TimeoutError:
-            print("🎉 Neue Anfrage gefunden!")
-            sende_push_benachrichtigung("Neue Anfrage!", "Du hast eine neue Anfrage.")
+             timeout=5000,
+            state="visible"  # Das ist default, kann aber explizit angegeben werden
+        )
+        sende_push_benachrichtigung("📭 Keine neue Anfrage.")
+    except asyncio.TimeoutError:
+        print("🎉 Neue Anfrage gefunden!")
+        sende_push_benachrichtigung("Neue Anfrage!", "Du hast eine neue Anfrage.")
         
         await browser.close()
 
@@ -97,6 +98,7 @@ async def run_script():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
+
 
 
 
