@@ -53,7 +53,8 @@ async def check():
         await page.wait_for_selector('input[name="loginemail"]', timeout=10000)
         await page.fill('input[name="loginemail"]', EMAIL)
         await page.fill('input[name="loginpassword"]', PASSWORD)
-        await page.click('button[name="login"]')
+        await page.wait_for_selector('xpath=//*[@id="loginform"]/form/p[3]/input', timeout=10000)
+        await page.click('xpath=//*[@id="loginform"]/form/p[3]/input')
 
         await page.wait_for_timeout(3000)
         await page.goto(ANFRAGEN_URL)
@@ -91,6 +92,7 @@ async def run_script():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
+
 
 
 
