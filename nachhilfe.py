@@ -40,6 +40,7 @@ async def check():
 
         print("🌐 Login...")
         await page.goto(LOGIN_URL)
+        await page.wait_for_load_state("networkidle")
 
         try:
             await page.click("#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll", timeout=5000)
@@ -54,6 +55,7 @@ async def check():
 
         await page.wait_for_timeout(3000)
         await page.goto(ANFRAGEN_URL)
+        await page.wait_for_load_state("networkidle")
 
         try:
             # XPath überprüfen wie bei Selenium
@@ -87,6 +89,7 @@ async def run_script():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
+
 
 
 
