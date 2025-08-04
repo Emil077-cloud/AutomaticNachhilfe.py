@@ -43,6 +43,7 @@ async def check():
         await page.wait_for_load_state("networkidle")
 
         try:
+            await page.wait_for_selector('#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll', timeout=5000)
             await page.click("#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll", timeout=5000)
             print("🍪 Cookie akzeptiert.")
         except:
@@ -89,6 +90,7 @@ async def run_script():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
+
 
 
 
