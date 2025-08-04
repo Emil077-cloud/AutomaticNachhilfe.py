@@ -73,8 +73,8 @@ async def check():
         await page.goto(ANFRAGEN_URL)
         await page.wait_for_load_state("networkidle")
         await asyncio.sleep(2)
-        sende_push_benachrichtigung("Seite", str(page.url()))
-        sende_push_benachrichtigung("Seite", str(await page.content()))
+        sende_push_benachrichtigung("Seite", str(page.url))  # NICHT page.url()
+        sende_push_benachrichtigung("Seite", str(await page.content()))  # page.content() ist async, also await nötig
 
         try:
             await page.wait_for_selector(
@@ -97,6 +97,7 @@ async def run_script():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
+
 
 
 
