@@ -18,6 +18,23 @@ PUSHOVER_USER_KEY = os.getenv("PUSHOVER_USER")
 print(f"Token: >{PUSHOVER_API_TOKEN}<")
 print(f"User: >{PUSHOVER_USER_KEY}<")
 
+async def click_button_by_xpath_in_all_frames(page, xpath: str):
+    for frame in page.frames:
+        element = await frame.query_selector(f'xpath={xpath}')
+        if element:
+            try:
+                await element.click()
+                print(f"✅ Button mit XPath '{xpath}' im Frame {frame.url} geklickt.")
+                sende_push_benachrichtigung("✅ Button gedrückt", f"XPath: {xpath}")
+                return True
+            except Exception as e:
+                print(f"❌ Fehler beim Klick auf Button im Frame {frame.url}: {e}")
+                sende_push_benachrichtigung("❌ Klick fehlgeschlagen", str(e))
+                return False
+    print(f"❌ Kein Button mit XPath '{xpath}' gefunden.")
+    sende_push_benachrichtigung("❌ Button nicht gefunden", f"XPath: {xpath}")
+    return False
+
 def sende_push_benachrichtigung(titel, nachricht=""):
     payload = {
         "token": PUSHOVER_API_TOKEN,
@@ -93,6 +110,7 @@ async def run_script():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
+
 
 
 
