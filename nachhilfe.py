@@ -41,6 +41,7 @@ async def check():
         print("🌐 Login...")
         await page.goto(LOGIN_URL)
         await page.wait_for_load_state("networkidle")
+        sende_push_benachrichtigung("📍 Aktuelle Seite:", str(page.url))
 
         try:
             await page.wait_for_selector('#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll', timeout=5000)
@@ -90,6 +91,7 @@ async def run_script():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
+
 
 
 
