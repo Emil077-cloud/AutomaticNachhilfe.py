@@ -18,23 +18,6 @@ PUSHOVER_USER_KEY = os.getenv("PUSHOVER_USER")
 print(f"Token: >{PUSHOVER_API_TOKEN}<")
 print(f"User: >{PUSHOVER_USER_KEY}<")
 
-async def click_button_by_xpath_in_all_frames(page, xpath: str):
-    for frame in page.frames:
-        element = await frame.query_selector(f'xpath={xpath}')
-        if element:
-            try:
-                await element.click()
-                print(f"✅ Button mit XPath '{xpath}' im Frame {frame.url} geklickt.")
-                sende_push_benachrichtigung("✅ Button gedrückt", f"XPath: {xpath}")
-                return True
-            except Exception as e:
-                print(f"❌ Fehler beim Klick auf Button im Frame {frame.url}: {e}")
-                sende_push_benachrichtigung("❌ Klick fehlgeschlagen", str(e))
-                return False
-    print(f"❌ Kein Button mit XPath '{xpath}' gefunden.")
-    sende_push_benachrichtigung("❌ Button nicht gefunden", f"XPath: {xpath}")
-    return False
-
 def sende_push_benachrichtigung(titel, nachricht=""):
     payload = {
         "token": PUSHOVER_API_TOKEN,
@@ -73,31 +56,30 @@ async def check():
 
         
         login_xpath = '//*[@id="loginform"]/form/p[3]/input'
-        await click_button_by_xpath_in_all_frames(page, login_xpath)
+        login_button_clicked = False
+        for frame in page.frames:
+            btn = await frame.query_selector(f'xpath={login_xpath}')
+            if btn:
+                await btn.click()
+                print(f"✅ Login-Button im Frame {frame.url} geklickt.")
+                sende_push_benachrichtigung("✅ Login Button gedrückt", f"Frame: {frame.url}")
+                login_button_clicked = True
+                break
+                
         await page.wait_for_timeout(3000)
         await page.goto(ANFRAGEN_URL)
         await page.wait_for_load_state("networkidle")
+        await asyncio.sleep(2)
 
         try:
-            # XPath überprüfen wie bei Selenium
-            kein_anfrage_element = await page.query_selector(
-                'xpath=//*[@id="online-anfragen-div"]//p[contains(text(), "Zur Zeit keine Anfragen verfügbar.")]'
-            )
-            if kein_anfrage_element:
-                sende_push_benachrichtigung("📭 Keine neue Anfrage.")
-            else:
-                raise Exception("Element nicht vorhanden = Anfrage vorhanden")
-        except:
+            await page.wait_for_selector(
+            'xpath=//*[@id="online-anfragen-div"]//p[contains(text(), "Zur Zeit keine Anfragen verfügbar.")]',
+            timeout=5000
+             )
+            sende_push_benachrichtigung("📭 Keine neue Anfrage.")
+        except asyncio.TimeoutError:
             print("🎉 Neue Anfrage gefunden!")
             sende_push_benachrichtigung("Neue Anfrage!", "Du hast eine neue Anfrage.")
-            if "Mahte" in await page.content() or "Mahtematik" in await page.content():
-                try:
-                    await page.click('button[name="annehmen"]')
-                    sende_push_benachrichtigung("Beworben", "Erfolgreich auf neue Anfrage beworben.")
-                except:
-                    sende_push_benachrichtigung("Fehler", "Bewerbungs-Knopf nicht gefunden.")
-            else:
-                sende_push_benachrichtigung("Fehler", "Falsches Fach.")
         
         await browser.close()
 
@@ -110,6 +92,7 @@ async def run_script():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
+
 
 
 
