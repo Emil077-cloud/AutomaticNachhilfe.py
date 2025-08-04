@@ -66,7 +66,7 @@ async def check():
                 'xpath=//*[@id="online-anfragen-div"]//p[contains(text(), "Zur Zeit keine Anfragen verfügbar.")]'
             )
             if kein_anfrage_element:
-                print("📭 Keine neue Anfrage.")
+                sende_push_benachrichtigung("📭 Keine neue Anfrage.")
             else:
                 raise Exception("Element nicht vorhanden = Anfrage vorhanden")
         except:
@@ -92,6 +92,7 @@ async def run_script():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
+
 
 
 
