@@ -1,5 +1,5 @@
 # Playwright Base-Image mit Python
-FROM mcr.microsoft.com/playwright/python:v1.43.1-jammy
+FROM mcr.microsoft.com/playwright/python:v1.44.0-jammy
 
 # Arbeitsverzeichnis setzen
 WORKDIR /app
