@@ -82,7 +82,7 @@ async def check():
              timeout=5000,
             state="visible"  # Das ist default, kann aber explizit angegeben werden
         )
-        sende_push_benachrichtigung("📭 Keine neue Anfrage.")
+        sende_push_benachrichtigung("Nachhilfe","📭 Keine neue Anfrage.")
         except Exception as e:
             print("🎉 Neue Anfrage gefunden!")
             sende_push_benachrichtigung("Neue Anfrage!", "Du hast eine neue Anfrage." + str(e))
@@ -98,6 +98,7 @@ async def run_script():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
+
 
 
 
