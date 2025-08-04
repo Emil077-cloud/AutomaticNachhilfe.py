@@ -14,6 +14,7 @@ PASSWORD = os.getenv("LOGIN_PASSWORD")
 
 PUSHOVER_API_TOKEN = os.getenv("PUSHOVER_API")
 PUSHOVER_USER_KEY = os.getenv("PUSHOVER_USER")
+time = 0
 
 def sende_push_benachrichtigung(titel, nachricht=""):
     payload = {
@@ -72,7 +73,6 @@ async def check():
             timeout=5000,
             state="visible"  # Das ist default, kann aber explizit angegeben werden
         )
-            sende_push_benachrichtigung("Nachhilfe", "📭 Keine neue Anfrage.")
         except Exception as e:
             print("🎉 Neue Anfrage gefunden!")
             sende_push_benachrichtigung("Neue Anfrage!", "Du hast eine neue Anfrage.")
@@ -86,7 +86,12 @@ async def run_script():
         except Exception as e:
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
+        time += 1
+        if time == 720:
+            sende_push_benachrichtigung("Skript läuft noch!", "Das Skript läuft bisher seit 12 Stunden flüssig.")
+            time = 0
         await asyncio.sleep(60)
+
 
 
 
