@@ -67,7 +67,7 @@ async def check():
             print("🎉 Neue Anfrage gefunden!")
             if "Mahte" in await page.content() or "Mahtematik" in await page.content():
                 try:
-                    await page.click('button[name="bewerben"]')
+                    await page.click('button[name="annehmen"]')
                     sende_push_benachrichtigung("Beworben", "Erfolgreich auf neue Anfrage beworben.")
                 except:
                     sende_push_benachrichtigung("Fehler", "Bewerbungs-Knopf nicht gefunden.")
@@ -86,5 +86,6 @@ async def loop():
 
 if __name__ == "__main__":
     asyncio.run(loop())
+
 
 
