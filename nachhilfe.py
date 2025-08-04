@@ -55,32 +55,8 @@ async def check():
         await page.fill('input[name="loginpassword"]', PASSWORD)
 
         
-        for frame in page.frames:
-        # Suche nach button[name="annehmen"]
-        button = await frame.query_selector('button[name="annehmen"]')
-        if button:
-            anfrage_button = button
-            print(f"Button als <button> im Frame {frame.url} gefunden.")
-            break
-        # Falls kein <button>, suche nach input[name="annehmen"]
-        input_button = await frame.query_selector('input[name="annehmen"]')
-        if input_button:
-            anfrage_button = input_button
-            print(f"Button als <input> im Frame {frame.url} gefunden.")
-            break
-
-        if anfrage_button:
-            try:
-                await anfrage_button.click()
-                print("✅ Button wurde geklickt.")
-                sende_push_benachrichtigung("✅ Bewerbung erfolgreich", "Button wurde gedrückt.")
-            except Exception as e:
-                print("❌ Fehler beim Klicken:", e)
-                sende_push_benachrichtigung("❌ Klick fehlgeschlagen", str(e))
-        else:
-            print("📭 Kein Button mit name='annehmen' gefunden.")
-            sende_push_benachrichtigung("📭 Keine neue Anfrage (Button nicht gefunden).")
-
+        login_xpath = '//*[@id="loginform"]/form/p[3]/input'
+        await click_button_by_xpath_in_all_frames(page, login_xpath)
         await page.wait_for_timeout(3000)
         await page.goto(ANFRAGEN_URL)
         await page.wait_for_load_state("networkidle")
@@ -117,6 +93,7 @@ async def run_script():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
+
 
 
 
