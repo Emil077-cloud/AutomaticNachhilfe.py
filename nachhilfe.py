@@ -45,9 +45,9 @@ async def check():
         try:
             await page.wait_for_selector('#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll', timeout=5000)
             await page.click("#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll", timeout=5000)
-            print("🍪 Cookie akzeptiert.")
+            sende_push_benachrichtigung("🍪 Cookie akzeptiert.")
         except:
-            print("🍪 Kein Cookie-Banner gefunden.")
+            sende_push_benachrichtigung("🍪 Kein Cookie-Banner gefunden.")
 
         await page.wait_for_selector('input[name="loginemail"]', timeout=10000)
         await page.fill('input[name="loginemail"]', EMAIL)
@@ -90,6 +90,7 @@ async def run_script():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
+
 
 
 
