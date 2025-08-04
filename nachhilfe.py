@@ -15,9 +15,6 @@ PASSWORD = os.getenv("LOGIN_PASSWORD")
 PUSHOVER_API_TOKEN = os.getenv("PUSHOVER_API")
 PUSHOVER_USER_KEY = os.getenv("PUSHOVER_USER")
 
-print(f"Token: >{PUSHOVER_API_TOKEN}<")
-print(f"User: >{PUSHOVER_USER_KEY}<")
-
 def sende_push_benachrichtigung(titel, nachricht=""):
     payload = {
         "token": PUSHOVER_API_TOKEN,
@@ -38,17 +35,15 @@ async def check():
         context = await browser.new_context()
         page = await context.new_page()
 
-        print("🌐 Login...")
         await page.goto(LOGIN_URL)
         await page.wait_for_load_state("networkidle")
-        sende_push_benachrichtigung("📍 Aktuelle Seite:", str(page.url))
 
         try:
             await page.wait_for_selector('#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll', timeout=5000)
             await page.click("#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll", timeout=5000)
-            sende_push_benachrichtigung("🍪 Cookie akzeptiert.", "f")
+            print("🍪 Cookie akzeptiert.")
         except:
-            sende_push_benachrichtigung("🍪 Kein Cookie-Banner gefunden.", "f")
+            print("🍪 Kein Cookie-Banner gefunden.")
 
         await page.wait_for_selector('input[name="loginemail"]', timeout=10000)
         await page.fill('input[name="loginemail"]', EMAIL)
@@ -65,16 +60,11 @@ async def check():
                 await btn.wait_for_element_state("enabled")
                 await btn.click(force=True)
                 print(f"✅ Login-Button im Frame {frame.url} geklickt.")
-                sende_push_benachrichtigung("✅ Login Button gedrückt", f"Frame: {frame.url}")
                 login_button_clicked = True
                 break
                 
-        await page.wait_for_timeout(3000)
         await page.goto(ANFRAGEN_URL)
         await page.wait_for_load_state("networkidle")
-        await asyncio.sleep(2)
-        sende_push_benachrichtigung("Seite", str(page.url))  # NICHT page.url()
-        sende_push_benachrichtigung("Seite", str(await page.content()))  # page.content() ist async, also await nötig
 
         try:
             await page.wait_for_selector(
@@ -85,8 +75,7 @@ async def check():
             sende_push_benachrichtigung("Nachhilfe", "📭 Keine neue Anfrage.")
         except Exception as e:
             print("🎉 Neue Anfrage gefunden!")
-            sende_push_benachrichtigung("Neue Anfrage!", "Du hast eine neue Anfrage." + str(e))
-        await asyncio.sleep(10)
+            sende_push_benachrichtigung("Neue Anfrage!", "Du hast eine neue Anfrage.")
         await browser.close()
 
 async def run_script():
@@ -98,6 +87,7 @@ async def run_script():
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
         await asyncio.sleep(60)
+
 
 
 
