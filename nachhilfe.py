@@ -1,7 +1,6 @@
 import asyncio
 from playwright.async_api import async_playwright
 import requests
-import time
 import os
 
 # === KONFIGURATION ===
@@ -14,7 +13,6 @@ PASSWORD = os.getenv("LOGIN_PASSWORD")
 
 PUSHOVER_API_TOKEN = os.getenv("PUSHOVER_API")
 PUSHOVER_USER_KEY = os.getenv("PUSHOVER_USER")
-time = 0
 
 def sende_push_benachrichtigung(titel, nachricht=""):
     payload = {
@@ -80,6 +78,7 @@ async def check():
         await browser.close()
 
 async def run_script():
+    time = 0
     sende_push_benachrichtigung("Skript gestartet", "Das Playwright-Skript läuft jetzt.")
     print("Skript gestartet.")
     while True:
@@ -93,6 +92,7 @@ async def run_script():
             sende_push_benachrichtigung("Skript läuft noch!", "Das Skript läuft bisher seit 12 Stunden flüssig.")
             time = 0
         await asyncio.sleep(60)
+
 
 
 
