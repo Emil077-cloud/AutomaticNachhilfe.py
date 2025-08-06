@@ -73,6 +73,7 @@ async def check():
             timeout=5000,
             state="visible"  # Das ist default, kann aber explizit angegeben werden
         )
+            print("Keine Anfrage gefunden.")
         except Exception as e:
             print("🎉 Neue Anfrage gefunden!")
             sende_push_benachrichtigung("Neue Anfrage!", "Du hast eine neue Anfrage.")
@@ -80,6 +81,7 @@ async def check():
 
 async def run_script():
     sende_push_benachrichtigung("Skript gestartet", "Das Playwright-Skript läuft jetzt.")
+    print("Skript gestartet.")
     while True:
         try:
             await check()
@@ -91,6 +93,7 @@ async def run_script():
             sende_push_benachrichtigung("Skript läuft noch!", "Das Skript läuft bisher seit 12 Stunden flüssig.")
             time = 0
         await asyncio.sleep(60)
+
 
 
 
