@@ -14,6 +14,7 @@ PASSWORD = os.getenv("LOGIN_PASSWORD")
 PUSHOVER_API_TOKEN = os.getenv("PUSHOVER_API")
 PUSHOVER_USER_KEY = os.getenv("PUSHOVER_USER")
 
+
 def sende_push_benachrichtigung(titel, nachricht=""):
     payload = {
         "token": PUSHOVER_API_TOKEN,
@@ -34,90 +35,100 @@ async def check():
         context = await browser.new_context()
         page = await context.new_page()
 
-        await page.goto(LOGIN_URL)
-        await page.wait_for_load_state("networkidle")
+        try:
+            await page.goto(LOGIN_URL, timeout=15000)
+            await page.wait_for_load_state("networkidle")
+        except Exception as e:
+            raise Exception(f"Fehler beim Laden der Login-Seite: {e}")
 
+        # Cookie-Banner wegklicken
         try:
             await page.wait_for_selector('#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll', timeout=5000)
-            await page.click("#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll", timeout=5000)
+            await page.click("#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll")
             print("🍪 Cookie akzeptiert.")
-            
         except:
             print("🍪 Kein Cookie-Banner gefunden.")
-            
 
+        # Login-Daten einfügen
         await page.wait_for_selector('input[name="loginemail"]', timeout=10000)
         await page.fill('input[name="loginemail"]', EMAIL)
         await page.fill('input[name="loginpassword"]', PASSWORD)
 
-        
+        # Login-Button klicken (erst auf Seite, dann in Frames)
         login_xpath = '//*[@id="loginform"]/form/p[3]/input'
         login_button_clicked = False
-        for frame in page.frames:
-            btn = await frame.query_selector(f'xpath={login_xpath}')
-            if btn:
-                await btn.scroll_into_view_if_needed()
-                await btn.wait_for_element_state("visible")
-                await btn.wait_for_element_state("enabled")
-                await btn.click(force=True)
-                print(f"✅ Login-Button im Frame {frame.url} geklickt.")
-                sende_push_benachrichtigung("Skript läuft noch!", "Das Skript läuft bisher seit 12 Stunden flüssig.")
-                login_button_clicked = True
-                break
-                
-        await page.goto(ANFRAGEN_URL)
-        await page.wait_for_load_state("networkidle")
 
+        # 1. Direkt auf der Seite
+        btn = await page.query_selector(f'xpath={login_xpath}')
+        if btn:
+            await btn.scroll_into_view_if_needed()
+            await btn.wait_for_element_state("visible")
+            await btn.wait_for_element_state("enabled")
+            await btn.click(force=True)
+            login_button_clicked = True
+            print("✅ Login-Button direkt auf Seite geklickt.")
+        else:
+            # 2. In Frames suchen
+            for frame in page.frames:
+                try:
+                    btn = await frame.query_selector(f'xpath={login_xpath}')
+                    if btn:
+                        await btn.scroll_into_view_if_needed()
+                        await btn.wait_for_element_state("visible")
+                        await btn.wait_for_element_state("enabled")
+                        await btn.click(force=True)
+                        login_button_clicked = True
+                        print(f"✅ Login-Button im Frame {frame.url} geklickt.")
+                        break
+                except:
+                    continue
+
+        if not login_button_clicked:
+            raise Exception("Login-Button konnte nicht gefunden oder geklickt werden.")
+
+        # Warten, bis Login erfolgreich
+        try:
+            await page.wait_for_selector('a[href*="logout"]', timeout=10000)
+            print("🔐 Login erfolgreich.")
+        except:
+            raise Exception("Login scheint fehlgeschlagen zu sein – Logout-Link nicht gefunden.")
+
+        # Zu den Anfragen wechseln
+        try:
+            await page.goto(ANFRAGEN_URL, timeout=15000)
+            await page.wait_for_load_state("networkidle")
+        except Exception as e:
+            raise Exception(f"Fehler beim Laden der Anfragenseite: {e}")
+
+        # Prüfen ob Anfragen da sind
         try:
             await page.wait_for_selector(
-            'xpath=//*[@id="online-anfragen-div"]//p[contains(text(), "Zur Zeit keine Anfragen verfügbar.")]',
-            timeout=5000,
-            state="visible") # Das ist default, kann aber explizit angegeben werden
-        
-        except Exception as e:
+                'xpath=//*[contains(text(), "keine Anfragen verfügbar")]',
+                timeout=5000,
+                state="visible"
+            )
+            print("📭 Keine neuen Anfragen.")
+        except:
             print("🎉 Neue Anfrage gefunden!")
             sende_push_benachrichtigung("Neue Anfrage!", "Du hast eine neue Anfrage.")
+
         await browser.close()
 
+
 async def run_script():
-    time = 0
+    durchläufe = 0
     sende_push_benachrichtigung("Skript gestartet", "Das Playwright-Skript läuft jetzt.")
+
     while True:
         try:
             await check()
         except Exception as e:
             sende_push_benachrichtigung("Fehler im Skript", str(e))
             print("❌ Fehler:", e)
-        time += 1
-        if time == 720:
+
+        durchläufe += 1
+        if durchläufe == 720:
             sende_push_benachrichtigung("Skript läuft noch!", "Das Skript läuft bisher seit 12 Stunden flüssig.")
-            time = 0
+            durchläufe = 0
+
         await asyncio.sleep(60)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
