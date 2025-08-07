@@ -40,8 +40,6 @@ async def check():
         )
         page = await context.new_page()
 
-        if not LOGIN_URL or not ANFRAGEN_URL:
-            raise Exception("❌ LOGIN_URL oder ANFRAGEN_URL ist nicht gesetzt.")
 
         print("🌍 Öffne Login-URL:", LOGIN_URL)
         try:
@@ -49,6 +47,7 @@ async def check():
             await page.wait_for_load_state("networkidle")
             print("✅ Login-Seite geladen.")
         except Exception as e:
+            await page.screenshot(path="/tmp/login_error.png")
             raise Exception(f"❌ Fehler beim Laden der Login-Seite: {e}")
 
         await page.wait_for_timeout(1000)
@@ -137,6 +136,7 @@ async def run_script():
             durchläufe = 0
 
         await asyncio.sleep(60)
+
 
 
 
