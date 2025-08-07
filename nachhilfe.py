@@ -41,10 +41,10 @@ async def check():
             await page.wait_for_selector('#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll', timeout=5000)
             await page.click("#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll", timeout=5000)
             print("🍪 Cookie akzeptiert.")
-            sende_push_benachrichtigung("Skript läuft noch!", "Cookies akzeptiert.")
+            
         except:
             print("🍪 Kein Cookie-Banner gefunden.")
-            sende_push_benachrichtigung("Skript läuft noch!", "Cookies nicht akzeptier.")
+            
 
         await page.wait_for_selector('input[name="loginemail"]', timeout=10000)
         await page.fill('input[name="loginemail"]', EMAIL)
@@ -73,7 +73,6 @@ async def check():
             'xpath=//*[@id="online-anfragen-div"]//p[contains(text(), "Zur Zeit keine Anfragen verfügbar.")]',
             timeout=5000,
             state="visible") # Das ist default, kann aber explizit angegeben werden
-            sende_push_benachrichtigung("Skript läuft noch!", "Keine neue Anfrage gefunden.")
         
         except Exception as e:
             print("🎉 Neue Anfrage gefunden!")
@@ -94,6 +93,7 @@ async def run_script():
             sende_push_benachrichtigung("Skript läuft noch!", "Das Skript läuft bisher seit 12 Stunden flüssig.")
             time = 0
         await asyncio.sleep(60)
+
 
 
 
