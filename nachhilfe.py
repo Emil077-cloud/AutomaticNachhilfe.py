@@ -28,18 +28,30 @@ def sende_push_benachrichtigung(titel, nachricht=""):
     else:
         print("❌ Fehler bei Push:", response.text)
 
-
 async def check():
     async with async_playwright() as p:
+        print("🚀 Starte Browser...")
         browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context()
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                       "(KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+            viewport={"width": 1280, "height": 720},
+            locale="de-DE"
+        )
         page = await context.new_page()
 
+        if not LOGIN_URL or not ANFRAGEN_URL:
+            raise Exception("❌ LOGIN_URL oder ANFRAGEN_URL ist nicht gesetzt.")
+
+        print("🌍 Öffne Login-URL:", LOGIN_URL)
         try:
             await page.goto(LOGIN_URL, timeout=15000)
             await page.wait_for_load_state("networkidle")
+            print("✅ Login-Seite geladen.")
         except Exception as e:
-            raise Exception(f"Fehler beim Laden der Login-Seite: {e}")
+            raise Exception(f"❌ Fehler beim Laden der Login-Seite: {e}")
+
+        await page.wait_for_timeout(1000
 
         # Cookie-Banner wegklicken
         try:
@@ -125,4 +137,5 @@ async def run_script():
             durchläufe = 0
 
         await asyncio.sleep(60)
+
 
