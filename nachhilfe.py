@@ -86,13 +86,6 @@ async def check():
         if not login_button_clicked:
             raise Exception("Login-Button konnte nicht gefunden oder geklickt werden.")
 
-        # Warten, bis Login erfolgreich
-        try:
-            await page.wait_for_selector('a[href*="logout"]', timeout=10000)
-            print("🔐 Login erfolgreich.")
-        except:
-            raise Exception("Login scheint fehlgeschlagen zu sein – Logout-Link nicht gefunden.")
-
         # Zu den Anfragen wechseln
         try:
             await page.goto(ANFRAGEN_URL, timeout=15000)
@@ -132,3 +125,4 @@ async def run_script():
             durchläufe = 0
 
         await asyncio.sleep(60)
+
