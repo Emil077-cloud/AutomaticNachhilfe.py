@@ -51,7 +51,7 @@ async def check():
         except Exception as e:
             raise Exception(f"❌ Fehler beim Laden der Login-Seite: {e}")
 
-        await page.wait_for_timeout(1000
+        await page.wait_for_timeout(1000)
 
         # Cookie-Banner wegklicken
         try:
@@ -137,5 +137,6 @@ async def run_script():
             durchläufe = 0
 
         await asyncio.sleep(60)
+
 
 
