@@ -72,9 +72,9 @@ async def check():
             await page.wait_for_selector(
             'xpath=//*[@id="online-anfragen-div"]//p[contains(text(), "Zur Zeit keine Anfragen verfügbar.")]',
             timeout=5000,
-            state="visible"  # Das ist default, kann aber explizit angegeben werden
+            state="visible") # Das ist default, kann aber explizit angegeben werden
             sende_push_benachrichtigung("Skript läuft noch!", "Keine neue Anfrage gefunden.")
-        )
+        
         except Exception as e:
             print("🎉 Neue Anfrage gefunden!")
             sende_push_benachrichtigung("Neue Anfrage!", "Du hast eine neue Anfrage.")
@@ -94,6 +94,7 @@ async def run_script():
             sende_push_benachrichtigung("Skript läuft noch!", "Das Skript läuft bisher seit 12 Stunden flüssig.")
             time = 0
         await asyncio.sleep(60)
+
 
 
 
